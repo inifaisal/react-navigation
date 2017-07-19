@@ -1,7 +1,7 @@
 /* @flow */
 
 import React, { PureComponent } from 'react';
-import { Animated, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import { Animated, TouchableWithoutFeedback, StyleSheet, TouchableNativeFeedback, Platform } from 'react-native';
 import TabBarIcon from './TabBarIcon';
 
 import type {
@@ -153,6 +153,27 @@ export default class TabBarBottom extends PureComponent<
             outputRange: (outputRange: Array<string>),
           });
           const justifyContent = this.props.showIcon ? 'flex-end' : 'center';
+
+          if (Platform.OS === 'android' && Platform.Version >= 21) {
+            return (
+              <TouchableNativeFeedback
+                key={route.key}
+                onPress={() => jumpToIndex(index)}
+                background={TouchableNativeFeedback.Ripple("#272727")}>
+                <Animated.View
+                  style={[
+                  styles.tab, {
+                    backgroundColor,
+                    justifyContent
+                  }
+                ]}>
+                  {this._renderIcon(scene)}
+                  {this._renderLabel(scene)}
+                </Animated.View>
+              </TouchableNativeFeedback>
+            )
+          }
+
           return (
             <TouchableWithoutFeedback
               key={route.key}
@@ -178,7 +199,7 @@ export default class TabBarBottom extends PureComponent<
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 49, // Default tab bar height in iOS 10
+    height: Platform.OS === 'ios' ? 49 : 56,
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(0, 0, 0, .3)',
